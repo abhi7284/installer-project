@@ -1,4 +1,5 @@
-from PyQt5.QtWidgets import QStackedWidget, QPushButton, QHBoxLayout, QWidget, QVBoxLayout
+from PyQt5.QtWidgets import QStackedWidget, QPushButton, QHBoxLayout, QWidget, QVBoxLayout, QLabel
+from PyQt5.QtGui import QPixmap
 
 from panels.introduction import IntroductionPanel
 from panels.license_agreement import LicenseAgreementPanel
@@ -10,19 +11,22 @@ from panels.complete import CompletePanel
 class PanelManager(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
-        
-        # Create stacked widget to handle switching between panels
+
+        # Create the main layout
+        main_layout = QVBoxLayout(self)
+
+        # Create a stacked widget for the panels
         self.stack = QStackedWidget(self)
-        
-        # Create default panels
+
+        # Create and add default panels
         self.introduction_panel = IntroductionPanel(self.stack)
         self.license_agreement_panel = LicenseAgreementPanel(self.stack)
         self.package_selection_panel = PackageSelectionPanel(self.stack)
         self.summary_panel = SummaryPanel(self.stack)
         self.progress_panel = ProgressPanel(self.stack)
         self.complete_panel = CompletePanel(self.stack)
-        
-        # Add panels to the stack in the order they should appear
+
+        # Add panels to the stack
         self.stack.addWidget(self.introduction_panel)
         self.stack.addWidget(self.license_agreement_panel)
         self.stack.addWidget(self.package_selection_panel)
@@ -30,7 +34,7 @@ class PanelManager(QWidget):
         self.stack.addWidget(self.progress_panel)
         self.stack.addWidget(self.complete_panel)
 
-        # Layout for buttons
+        # Create navigation buttons
         self.next_button = QPushButton("Next", self)
         self.previous_button = QPushButton("Previous", self)
 
@@ -44,12 +48,30 @@ class PanelManager(QWidget):
         button_layout.addWidget(self.previous_button)
         button_layout.addWidget(self.next_button)
 
-        # Create the main layout
-        main_layout = QVBoxLayout(self)
+        # Create a layout for the bottom icon
+        icon_layout = QHBoxLayout()
+        self.icon_label = QLabel(self)
+
+        # Load icon with error checking
+        icon_path = "installer/icons/icon.png"  # Adjust path as needed
+        pixmap = QPixmap(icon_path)
+        if pixmap.isNull():
+            print("Error: Icon not found or unable to load.")
+        
+        # Resize the icon to 100x50 pixels
+        self.icon_label.setPixmap(pixmap.scaled(100, 50, aspectRatioMode=1))  # Keep aspect ratio
+
+        # Set the background of the icon label to be transparent
+        self.icon_label.setStyleSheet("background: transparent;")
+
+        icon_layout.addWidget(self.icon_label)
+        icon_layout.addStretch(1)  # Push the icon to the left
+
+        # Add components to the main layout
         main_layout.addWidget(self.stack)
         main_layout.addLayout(button_layout)
+        main_layout.addLayout(icon_layout)
 
-        # Set the introduction panel as the starting panel
         self.update_navigation_buttons(0)
 
     def next_panel(self):
@@ -70,4 +92,3 @@ class PanelManager(QWidget):
         """Enable or disable buttons based on the current panel index."""
         self.previous_button.setEnabled(index > 0)  # Disable "Previous" on first panel
         self.next_button.setEnabled(index < self.stack.count() - 1)  # Disable "Next" on last panel
-
