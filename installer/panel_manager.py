@@ -7,6 +7,7 @@ import sys
 from panels.introduction import IntroductionPanel
 from panels.license_agreement import LicenseAgreementPanel
 from panels.package_selection import PackageSelectionPanel
+from panels.choose_install_directory import ChooseInstallDirectoryPanel
 from panels.summary import SummaryPanel
 from panels.progress import ProgressPanel
 from panels.complete import CompletePanel
@@ -25,6 +26,7 @@ class PanelManager(QWidget):
         self.introduction_panel = IntroductionPanel(self.stack)
         self.license_agreement_panel = LicenseAgreementPanel(self.stack)
         self.package_selection_panel = PackageSelectionPanel(self.stack)
+        self.choose_install_directory_panel = ChooseInstallDirectoryPanel(self.stack)
         self.summary_panel = SummaryPanel(self.stack)
         self.progress_panel = ProgressPanel(self.stack)
         self.complete_panel = CompletePanel(self.stack)
@@ -33,6 +35,7 @@ class PanelManager(QWidget):
         self.stack.addWidget(self.introduction_panel)
         self.stack.addWidget(self.license_agreement_panel)
         self.stack.addWidget(self.package_selection_panel)
+        self.stack.addWidget(self.choose_install_directory_panel)
         self.stack.addWidget(self.summary_panel)
         self.stack.addWidget(self.progress_panel)
         self.stack.addWidget(self.complete_panel)
