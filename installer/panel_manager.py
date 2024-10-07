@@ -1,5 +1,8 @@
-from PyQt5.QtWidgets import QStackedWidget, QPushButton, QHBoxLayout, QWidget, QVBoxLayout, QLabel
+from PyQt5.QtWidgets import QStackedWidget, QPushButton, QHBoxLayout, QWidget, QVBoxLayout, QLabel, QFrame
 from PyQt5.QtGui import QPixmap
+from PyQt5.QtCore import Qt
+import sys
+
 
 from panels.introduction import IntroductionPanel
 from panels.license_agreement import LicenseAgreementPanel
@@ -34,61 +37,90 @@ class PanelManager(QWidget):
         self.stack.addWidget(self.progress_panel)
         self.stack.addWidget(self.complete_panel)
 
-        # Create navigation buttons
-        self.next_button = QPushButton("Next", self)
-        self.previous_button = QPushButton("Previous", self)
+        # Create a frame for the icon and navigation buttons
+        bottom_frame = QFrame(self)
+        bottom_layout = QHBoxLayout(bottom_frame)
 
-        # Connect buttons to methods
-        self.next_button.clicked.connect(self.next_panel)
-        self.previous_button.clicked.connect(self.previous_panel)
+        # Set margins for the icon and buttons
+        bottom_layout.setContentsMargins(10, 0, 10, 0)  # 10px margin on both left and right
 
-        # Create a layout for navigation buttons
-        button_layout = QHBoxLayout()
-        button_layout.addStretch(1)
-        button_layout.addWidget(self.previous_button)
-        button_layout.addWidget(self.next_button)
-
-        # Create a layout for the bottom icon
-        icon_layout = QHBoxLayout()
+        # Create a label for the icon
         self.icon_label = QLabel(self)
-
-        # Load icon with error checking
-        icon_path = "installer/icons/icon.png"  # Adjust path as needed
+        icon_path = "installer/icons/icon.png"  # Update with the actual path to your icon
         pixmap = QPixmap(icon_path)
-        if pixmap.isNull():
-            print("Error: Icon not found or unable to load.")
-        
-        # Resize the icon to 100x50 pixels
-        self.icon_label.setPixmap(pixmap.scaled(100, 50, aspectRatioMode=1))  # Keep aspect ratio
+        if not pixmap.isNull():
+            self.icon_label.setPixmap(pixmap.scaled(100, 50, Qt.KeepAspectRatio))  # Resize to 100x50
+        else:
+            print("Icon not found or unable to load")
 
         # Set the background of the icon label to be transparent
         self.icon_label.setStyleSheet("background: transparent;")
 
-        icon_layout.addWidget(self.icon_label)
-        icon_layout.addStretch(1)  # Push the icon to the left
+        # Add the icon to the bottom layout (left side)
+        bottom_layout.addWidget(self.icon_label)
 
-        # Add components to the main layout
+        # Add spacing to push the buttons to the right side
+        bottom_layout.addStretch(1)
+
+        # Create navigation buttons (Next, Previous, and Done)
+        self.previous_button = QPushButton("Previous", self)
+        self.next_button = QPushButton("Next", self)
+        self.done_button = QPushButton("Done", self)
+
+        # Connect the buttons to their respective methods
+        self.next_button.clicked.connect(self.next_panel)
+        self.previous_button.clicked.connect(self.previous_panel)
+        self.done_button.clicked.connect(self.exit_application)
+
+        # Add the buttons to the right side of the layout
+        bottom_layout.addWidget(self.previous_button)
+        bottom_layout.addWidget(self.next_button)
+        bottom_layout.addWidget(self.done_button)
+
+        # Initially, hide the Done button
+        self.done_button.setVisible(False)
+
+        # Add the stacked widget (panels) and bottom frame (buttons + icon) to the main layout
         main_layout.addWidget(self.stack)
-        main_layout.addLayout(button_layout)
-        main_layout.addLayout(icon_layout)
+        main_layout.addWidget(bottom_frame)
 
+        # Set the layout for the main widget
+        self.setLayout(main_layout)
+
+        # Initially, hide the Previous button (because it's the first panel)
         self.update_navigation_buttons(0)
 
     def next_panel(self):
-        """Switch to the next panel."""
+        """Move to the next panel in the stack."""
         current_index = self.stack.currentIndex()
-        if current_index < self.stack.count() - 1:
+        if current_index < self.stack.count() - 1:  # If not on the last panel
             self.stack.setCurrentIndex(current_index + 1)
         self.update_navigation_buttons(current_index + 1)
 
     def previous_panel(self):
-        """Switch to the previous panel."""
+        """Move to the previous panel in the stack."""
         current_index = self.stack.currentIndex()
-        if current_index > 0:
+        if current_index > 0:  # If not on the first panel
             self.stack.setCurrentIndex(current_index - 1)
         self.update_navigation_buttons(current_index - 1)
 
     def update_navigation_buttons(self, index):
-        """Enable or disable buttons based on the current panel index."""
-        self.previous_button.setEnabled(index > 0)  # Disable "Previous" on first panel
-        self.next_button.setEnabled(index < self.stack.count() - 1)  # Disable "Next" on last panel
+        """Update visibility of Next, Previous, and Done buttons based on the panel index."""
+        # Hide Previous button if it's the first panel
+        if index == 0:
+            self.previous_button.setVisible(False)
+        else:
+            self.previous_button.setVisible(True)
+
+        # Hide Next button and show Done button if it's the last panel
+        if index == self.stack.count() - 1:
+            self.next_button.setVisible(False)
+            self.previous_button.setVisible(False)
+            self.done_button.setVisible(True)
+        else:
+            self.next_button.setVisible(True)
+            self.done_button.setVisible(False)
+
+    def exit_application(self):
+        """Exit the application when Done button is clicked."""
+        sys.exit()

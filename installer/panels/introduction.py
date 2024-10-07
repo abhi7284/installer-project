@@ -11,8 +11,8 @@ class IntroductionPanel(QWidget):
 
         # Create a label for the background image
         self.background_label = QLabel(self)
-        pixmap = QPixmap("path_to_your_image/background.jpg")  # Update with the actual path to your image
-        self.background_label.setPixmap(pixmap)
+        # pixmap = QPixmap("installer/icons/background.jpg")  # Update with the actual path to your image
+        # self.background_label.setPixmap(pixmap)
         self.background_label.setScaledContents(True)  # Scale the image to fit the label
         self.background_label.setGeometry(self.rect())  # Set it to fill the panel
 
