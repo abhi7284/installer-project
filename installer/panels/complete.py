@@ -1,14 +1,9 @@
-from PyQt5.QtWidgets import QWidget, QLabel, QVBoxLayout
+from PyQt5.QtWidgets import QVBoxLayout, QLabel
+from panels.base_panel import BasePanel
 
-class CompletePanel(QWidget):
+class CompletePanel(BasePanel):
     def __init__(self, parent=None):
-        super().__init__(parent)
-        layout = QVBoxLayout(self)
-        
-        # Create a label to display the introduction message
-        self.intro_label = QLabel("Complete Panel", self)
-        layout.addWidget(self.intro_label)
-
-    def update_message(self, new_message):
-        """Method to update the label on this panel."""
-        self.intro_label.setText(new_message)
+        super().__init__("Installation Complete", "The installation has been successfully completed.", parent)
+        # Add any additional completion display widgets here
+        self.complete_label = QLabel("Thank you for installing!", self)
+        self.layout().addWidget(self.complete_label)

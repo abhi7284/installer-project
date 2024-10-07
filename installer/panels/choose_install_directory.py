@@ -1,31 +1,25 @@
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QLineEdit, QPushButton, QFileDialog
+from PyQt5.QtWidgets import QVBoxLayout, QLabel, QPushButton, QLineEdit, QFileDialog
+from panels.base_panel import BasePanel
 
-class ChooseInstallDirectoryPanel(QWidget):
+class ChooseInstallDirectoryPanel(BasePanel):
     def __init__(self, parent=None):
-        super().__init__(parent)
+        super().__init__("Choose Installation Directory", "Select where you want to install the packages.", parent)
 
-        # Create layout for the panel
-        layout = QVBoxLayout(self)
+        self.install_directory = ""  # Variable to hold the selected directory
+        layout = self.layout()  # Get the existing layout
 
-        # Add label
-        label = QLabel("Please choose the installation directory:", self)
-        layout.addWidget(label)
+        # Input field for directory path
+        self.directory_input = QLineEdit(self)
+        layout.addWidget(self.directory_input)
 
-        # Add text input to display selected directory
-        self.dir_input = QLineEdit(self)
-        self.dir_input.setPlaceholderText("Installation directory path...")
-        layout.addWidget(self.dir_input)
+        # Button to choose the directory
+        choose_button = QPushButton("Choose Directory", self)
+        choose_button.clicked.connect(self.choose_directory)
+        layout.addWidget(choose_button)
 
-        # Add 'Choose Directory' button
-        self.choose_dir_button = QPushButton("Choose Directory", self)
-        self.choose_dir_button.clicked.connect(self.open_directory_dialog)
-        layout.addWidget(self.choose_dir_button)
-
-        # Set the layout
-        self.setLayout(layout)
-
-    def open_directory_dialog(self):
-        """Opens a dialog to select the installation directory."""
-        selected_dir = QFileDialog.getExistingDirectory(self, "Select Installation Directory")
-        if selected_dir:  # If a directory is selected
-            self.dir_input.setText(selected_dir)
+    def choose_directory(self):
+        """Open a dialog to choose a directory and set it in the input field."""
+        directory = QFileDialog.getExistingDirectory(self, "Select Directory")
+        if directory:
+            self.install_directory = directory
+            self.directory_input.setText(directory)  # Display the selected directory

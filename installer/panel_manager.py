@@ -1,9 +1,4 @@
-from PyQt5.QtWidgets import QStackedWidget, QPushButton, QHBoxLayout, QWidget, QVBoxLayout, QLabel, QFrame
-from PyQt5.QtGui import QPixmap
-from PyQt5.QtCore import Qt
-import sys
-
-
+from PyQt5.QtWidgets import QWidget, QStackedWidget, QVBoxLayout
 from panels.introduction import IntroductionPanel
 from panels.license_agreement import LicenseAgreementPanel
 from panels.package_selection import PackageSelectionPanel
@@ -11,6 +6,9 @@ from panels.choose_install_directory import ChooseInstallDirectoryPanel
 from panels.summary import SummaryPanel
 from panels.progress import ProgressPanel
 from panels.complete import CompletePanel
+from PyQt5.QtWidgets import QHBoxLayout, QPushButton, QFrame, QLabel, QSpacerItem, QSizePolicy, QVBoxLayout
+
+import sys
 
 class PanelManager(QWidget):
     def __init__(self, parent=None):
@@ -27,7 +25,7 @@ class PanelManager(QWidget):
         self.license_agreement_panel = LicenseAgreementPanel(self.stack)
         self.package_selection_panel = PackageSelectionPanel(self.stack)
         self.choose_install_directory_panel = ChooseInstallDirectoryPanel(self.stack)
-        self.summary_panel = SummaryPanel(self.stack)
+        self.summary_panel = SummaryPanel([], "", self.stack)  # Initially empty
         self.progress_panel = ProgressPanel(self.stack)
         self.complete_panel = CompletePanel(self.stack)
 
@@ -40,30 +38,9 @@ class PanelManager(QWidget):
         self.stack.addWidget(self.progress_panel)
         self.stack.addWidget(self.complete_panel)
 
-        # Create a frame for the icon and navigation buttons
+        # Create a frame for the navigation buttons
         bottom_frame = QFrame(self)
         bottom_layout = QHBoxLayout(bottom_frame)
-
-        # Set margins for the icon and buttons
-        bottom_layout.setContentsMargins(10, 0, 10, 0)  # 10px margin on both left and right
-
-        # Create a label for the icon
-        self.icon_label = QLabel(self)
-        icon_path = "installer/icons/icon.png"  # Update with the actual path to your icon
-        pixmap = QPixmap(icon_path)
-        if not pixmap.isNull():
-            self.icon_label.setPixmap(pixmap.scaled(100, 50, Qt.KeepAspectRatio))  # Resize to 100x50
-        else:
-            print("Icon not found or unable to load")
-
-        # Set the background of the icon label to be transparent
-        self.icon_label.setStyleSheet("background: transparent;")
-
-        # Add the icon to the bottom layout (left side)
-        bottom_layout.addWidget(self.icon_label)
-
-        # Add spacing to push the buttons to the right side
-        bottom_layout.addStretch(1)
 
         # Create navigation buttons (Next, Previous, and Done)
         self.previous_button = QPushButton("Previous", self)
@@ -75,7 +52,7 @@ class PanelManager(QWidget):
         self.previous_button.clicked.connect(self.previous_panel)
         self.done_button.clicked.connect(self.exit_application)
 
-        # Add the buttons to the right side of the layout
+        # Add the buttons to the layout
         bottom_layout.addWidget(self.previous_button)
         bottom_layout.addWidget(self.next_button)
         bottom_layout.addWidget(self.done_button)
@@ -83,7 +60,7 @@ class PanelManager(QWidget):
         # Initially, hide the Done button
         self.done_button.setVisible(False)
 
-        # Add the stacked widget (panels) and bottom frame (buttons + icon) to the main layout
+        # Add the stacked widget and bottom frame to the main layout
         main_layout.addWidget(self.stack)
         main_layout.addWidget(bottom_frame)
 
@@ -96,9 +73,19 @@ class PanelManager(QWidget):
     def next_panel(self):
         """Move to the next panel in the stack."""
         current_index = self.stack.currentIndex()
+        if current_index == 1:  # License Agreement panel
+            if not self.license_agreement_panel.accept_checkbox.isChecked():
+                return  # Don't proceed if checkbox is not checked
+
         if current_index < self.stack.count() - 1:  # If not on the last panel
             self.stack.setCurrentIndex(current_index + 1)
         self.update_navigation_buttons(current_index + 1)
+
+        # Update the Summary panel with selected data
+        if current_index == 3:  # Moving to Summary Panel
+            selected_packages = self.package_selection_panel.selected_packages
+            install_directory = self.choose_install_directory_panel.install_directory
+            self.summary_panel.update_summary(selected_packages, install_directory)
 
     def previous_panel(self):
         """Move to the previous panel in the stack."""
@@ -110,15 +97,11 @@ class PanelManager(QWidget):
     def update_navigation_buttons(self, index):
         """Update visibility of Next, Previous, and Done buttons based on the panel index."""
         # Hide Previous button if it's the first panel
-        if index == 0:
-            self.previous_button.setVisible(False)
-        else:
-            self.previous_button.setVisible(True)
+        self.previous_button.setVisible(index > 0)
 
         # Hide Next button and show Done button if it's the last panel
         if index == self.stack.count() - 1:
             self.next_button.setVisible(False)
-            self.previous_button.setVisible(False)
             self.done_button.setVisible(True)
         else:
             self.next_button.setVisible(True)
