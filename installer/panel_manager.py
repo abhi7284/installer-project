@@ -13,7 +13,7 @@ import sys
 class PanelManager(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
-
+        self.resize(400, 300)
         # Create the main layout
         main_layout = QVBoxLayout(self)
 
@@ -46,6 +46,9 @@ class PanelManager(QWidget):
         self.previous_button = QPushButton("Previous", self)
         self.next_button = QPushButton("Next", self)
         self.done_button = QPushButton("Done", self)
+        self.previous_button.setFixedSize(100, 25) 
+        self.next_button.setFixedSize(100, 25) 
+        self.done_button.setFixedSize(100, 25) 
 
         # Connect the buttons to their respective methods
         self.next_button.clicked.connect(self.next_panel)
@@ -75,6 +78,7 @@ class PanelManager(QWidget):
         current_index = self.stack.currentIndex()
         if current_index == 1:  # License Agreement panel
             if not self.license_agreement_panel.accept_checkbox.isChecked():
+                self.next_button.setStyleSheet("background-color: lightblue; color: white;")
                 return  # Don't proceed if checkbox is not checked
 
         if current_index < self.stack.count() - 1:  # If not on the last panel

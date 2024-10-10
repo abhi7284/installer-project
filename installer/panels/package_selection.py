@@ -23,15 +23,15 @@ class PackageSelectionPanel(BasePanel):
         # Add package checkboxes to the main layout
         layout.addLayout(package_layout)
 
-        # Package description area
-        self.description_browser = QTextBrowser(self)
-        layout.addWidget(self.description_browser)
+        # Package label area
+        self.description_label = QLabel(self)
+        layout.addWidget(self.description_label)
 
     def on_checkbox_toggled(self):
         """Update selected packages and display the description of the selected package."""
         self.selected_packages = [checkbox.text() for checkbox in self.package_checkboxes if checkbox.isChecked()]
         if self.selected_packages:
-            self.description_browser.setText(f"Selected Package: {self.selected_packages[-1]}")
+            self.description_label.setText(f"{self.selected_packages[-1]}")
         else:
-            self.description_browser.setText("No package selected.")
+            self.description_label.setText("No package selected.")
 
