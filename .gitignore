@@ -1,1 +1,3 @@
 __pycache__
+installer/panels/__pycache__/*
+installer/__pycache__/*
