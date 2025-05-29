@@ -3,28 +3,36 @@ import json
 import shutil
 import zipfile
 import sys
+import logging
 
 
+
+# Set up logging
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s"
+)
 
 def validate_config(root_folder):
     mandatory_file_list = ["config.json", "app.py"]
     for file in mandatory_file_list:
         if not os.path.join(root_folder, file):
-            print(f"error: {file} not found insidr config")
+            logging.info(f"error: {file} not found insidr config")
             sys.exit(1)
 
 def copy_folder(source_folder, destination_folder):
     if not os.path.isdir(source_folder):
-        print(f"The source folder '{source_folder}' does not exist.")
+        logging.info(f"The source folder '{source_folder}' does not exist.")
         return
     if os.path.isdir(destination_folder):
         shutil.rmtree(destination_folder)
     # Copy the folder
     shutil.copytree(source_folder, destination_folder)
-    # print(f"Folder '{source_folder}' copied to '{destination_folder}'.")
+    logging.info(f"Folder '{source_folder}' copied to '{destination_folder}'.")
 
 
 def zip_folder(folder_path, zip_path):
+    logging.info(f"creating zip: {folder_path}")
     # Create a new zip file at the specified path
     with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
         # Traverse all files and folders in the directory
@@ -56,8 +64,9 @@ def get_valid_package_list(root_folder):
         
     return valid_folders
 
-def create_global_config():
+def create_pre_build(packages):
     valid_package_list = get_valid_package_list(packages)
+    logging.info(f"package list: {valid_package_list}")
     global_dict = {}
     global_dict['packages'] = {}
     for package_name in valid_package_list:
@@ -79,7 +88,7 @@ def create_global_config():
     configuration_folder = os.path.join(".build")
     if not os.path.exists(configuration_folder):
         os.makedirs(configuration_folder)
-        # print(f"Directory '{configuration_folder}' created.")
+        logging.info(f"Directory '{configuration_folder}' created.")
 
     global_config_file = os.path.join(configuration_folder, "global_data.json")
     with open(global_config_file, "w+") as f:
@@ -89,4 +98,4 @@ config = "config"
 packages = "packages"
 
 validate_config(config)
-create_global_config()
+create_pre_build(packages)
